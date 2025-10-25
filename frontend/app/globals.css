@@ -120,5 +120,27 @@
   }
   body {
     @apply bg-background text-foreground;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Chat container styles */
+  .chat-container {
+    height: calc(100vh - 8rem);
+    overflow-y: auto;
+    padding-top: 1rem;
+    margin-top: 1rem;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .title-text {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+    }
+    
+    .chat-container {
+      height: calc(100vh - 7rem);
+    }
   }
 }
