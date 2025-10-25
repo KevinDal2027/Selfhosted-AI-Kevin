@@ -4,16 +4,54 @@ import { Ollama } from 'ollama';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-app.use(cors());
+
+// Environment variables for security
+const API_KEY = process.env.API_KEY;
+const OLLAMA_HOST = process.env.OLLAMA_HOST;
+const PORT = process.env.PORT || 3001;
+
+// Rate limiting - 50 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { error: 'Too many requests, please try again later.' }
+});
+
+// CORS for your domain only
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://ai.kevinqh.com'
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 
+// API Key middleware
+const apiKeyAuth = (req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+  
+  if (!apiKey || apiKey !== API_KEY) {
+    return res.status(401).json({ 
+      error: 'Unauthorized - Invalid API Key' 
+    });
+  }
+  
+  next();
+};
+
 const ollama = new Ollama({ 
-  host: process.env.OLLAMA_HOST || 'http://localhost:11434' 
+  host: OLLAMA_HOST
 });
 
 // Load your personal data
@@ -76,9 +114,14 @@ function getRelevantContext(question, fullContext) {
   return personal + '\n\n' + recentProjects;
 }
 
-app.post('/api/chat', async (req, res) => {
+// Apply rate limiting and API key to chat endpoint
+app.post('/api/chat', apiKeyAuth, limiter, async (req, res) => {
   const { message } = req.body;
   
+  if (!message || message.trim().length === 0) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
   // Get only the relevant context to make responses faster
   const relevantContext = getRelevantContext(message, aboutKevin);
   
@@ -143,6 +186,7 @@ Kevin's response in first person (as if Kevin is talking directly):`;
   }
 });
 
+// Health endpoint (no API key required)
 app.get('/api/health', async (req, res) => {
   try {
     const models = await ollama.list();
@@ -159,7 +203,7 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Kevin AI API running on port ${PORT}`);
+  console.log(`Environment: API_KEY=${API_KEY ? 'Set' : 'Not set'}, OLLAMA_HOST=${OLLAMA_HOST}`);
 });

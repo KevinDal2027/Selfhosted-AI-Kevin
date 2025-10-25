@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +8,11 @@ import { Card } from "@/components/ui/card"
 import { Send, Moon, Sun } from "lucide-react"
 import { ParticleBackground } from "@/components/particle-background"
 import { useTheme } from "@/components/theme-provider"
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY
 
 interface Message {
   id: string
@@ -74,84 +78,92 @@ export default function ChatPage() {
     setMounted(true)
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!input.trim() || isLoading) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    const currentInput = input
-    setInput("")
-    setIsLoading(true)
-    if (introVisible) setIntroVisible(false)
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: currentInput }),
-      })
-
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-      const data = await res.json()
-      const messageId = (Date.now() + 1).toString()
-      
-      // Start typing animation
-      typeMessage(data?.answer ?? "Sorry, I couldn't generate a response.", messageId)
-    } catch (err: any) {
-      const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        role: "assistant",
-        content: "The AI service is unavailable right now. Please try again shortly.",
-      }
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    role: "user",
+    content: input,
   }
-  
-  const handleSuggestionClick = async (suggestion: string) => {
-    if (isLoading) return
+
+  setMessages((prev) => [...prev, userMessage])
+  const currentInput = input
+  setInput("")
+  setIsLoading(true)
+  if (introVisible) setIntroVisible(false)
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json"
+    }
+    if (API_KEY) headers["X-API-Key"] = API_KEY
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ message: currentInput }),
+    })
+
+    if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+    const data = await res.json()
+    const messageId = (Date.now() + 1).toString()
     
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: suggestion,
+    // Start typing animation
+    typeMessage(data?.answer ?? "Sorry, I couldn't generate a response.", messageId)
+  } catch (err: any) {
+    const errorMessage: Message = {
+      id: (Date.now() + 2).toString(),
+      role: "assistant",
+      content: "The AI service is unavailable right now. Please try again shortly.",
     }
-
-    setMessages((prev) => [...prev, userMessage])
-    setIsLoading(true)
-    if (introVisible) setIntroVisible(false)
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: suggestion }),
-      })
-
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-      const data = await res.json()
-      const messageId = (Date.now() + 1).toString()
-      
-      // Start typing animation
-      typeMessage(data?.answer ?? "Sorry, I couldn't generate a response.", messageId)
-    } catch (err: any) {
-      const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        role: "assistant",
-        content: "The AI service is unavailable right now. Please try again shortly.",
-      }
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
+    setMessages((prev) => [...prev, errorMessage])
+  } finally {
+    setIsLoading(false)
   }
+  } 
+  
+const handleSuggestionClick = async (suggestion: string) => {
+  if (isLoading) return
+  
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    role: "user",
+    content: suggestion,
+  }
+
+  setMessages((prev) => [...prev, userMessage])
+  setIsLoading(true)
+  if (introVisible) setIntroVisible(false)
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json"
+    }
+    if (API_KEY) headers["X-API-Key"] = API_KEY
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ message: suggestion }),
+    })
+
+    if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+    const data = await res.json()
+    const messageId = (Date.now() + 1).toString()
+    
+    // Start typing animation
+    typeMessage(data?.answer ?? "Sorry, I couldn't generate a response.", messageId)
+  } catch (err: any) {
+    const errorMessage: Message = {
+      id: (Date.now() + 2).toString(),
+      role: "assistant",
+      content: "The AI service is unavailable right now. Please try again shortly.",
+    }
+    setMessages((prev) => [...prev, errorMessage])
+  } finally {
+    setIsLoading(false)
+  }
+}
 
   const resetChat = () => {
     setMessages([])
