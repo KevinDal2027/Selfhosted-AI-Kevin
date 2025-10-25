@@ -173,7 +173,7 @@ const handleSuggestionClick = async (suggestion: string) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-background overflow-hidden">
+    <div className="fixed inset-0 bg-background overflow-hidden flex flex-col">
       <ParticleBackground />
 
       {/* Intro overlay */}
@@ -185,146 +185,144 @@ const handleSuggestionClick = async (suggestion: string) => {
         </div>
       )}
 
-      <div className="relative z-10 flex h-full flex-col">
-        {/* Header */}
-        <header className="border-b border-border/40 bg-background/80 backdrop-blur-sm flex-shrink-0">
-          <div className="container mx-auto flex items-center justify-between px-4 py-2">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={resetChat}
-                className="text-lg font-bold text-foreground hover:opacity-80 md:text-2xl focus:outline-none focus:underline"
-                type="button"
-              >
-                Chat with Kevin
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Removed Home button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="rounded-full"
-              >
-                {mounted ? (
-                  theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />
-                ) : (
-                  <span className="inline-block h-5 w-5" />
-                )}
-                <span className="sr-only">Toggle theme</span>
-              </Button>
-            </div>
-          </div>
-        </header>
-
-        {/* Chat Messages */}
-        <main className="container mx-auto flex-1 overflow-hidden px-4">
-          <div className="mx-auto h-full max-w-3xl">
-            <div className="overflow-y-auto py-4 space-y-4 px-2"
-                 style={{
-                   height: 'calc(100vh - 8rem)',
-                   paddingBottom: '5.5rem', // space for chatbox
-                   paddingTop: '0.5rem',
-                 }}
+      {/* Header */}
+      <header className="border-b border-border/40 bg-background/80 backdrop-blur-sm flex-shrink-0">
+        <div className="container mx-auto flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={resetChat}
+              className="text-lg font-bold text-foreground hover:opacity-80 md:text-2xl focus:outline-none focus:underline"
+              type="button"
             >
-              {/* Chat suggestions (show when no messages) */}
-              {messages.length === 0 && !isLoading && (
-                <div className="flex flex-wrap gap-2 justify-center mb-6">
-                  {chatSuggestions.map((suggestion, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="text-xs"
-                    >
-                      {suggestion}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <Card
-                    className={`max-w-[80%] p-4 ${
-                      message.role === "user" ? "bg-primary text-primary-foreground" : "bg-card text-card-foreground"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
-                  </Card>
-                </div>
-              ))}
-              
-              {/* Show typing message */}
-              {typingMessage && (
-                <div className="flex justify-start">
-                  <Card className="max-w-[80%] bg-card p-4 text-card-foreground">
-                    <p className="text-sm leading-relaxed">
-                      {typingMessage.content}
-                      <span className="inline-block w-2 h-5 bg-foreground ml-1 animate-pulse">|</span>
-                    </p>
-                  </Card>
-                </div>
-              )}
-              
-              {/* Show thinking message */}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <Card className="max-w-[80%] bg-card p-4 text-card-foreground">
-                    <p className="text-sm text-muted-foreground italic">
-                      Kevin is thinking...
-                    </p>
-                  </Card>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+              Chat with Kevin
+            </button>
           </div>
-        </main>
+          <div className="flex items-center gap-2">
+            {/* Removed Home button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="rounded-full"
+            >
+              {mounted ? (
+                theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />
+              ) : (
+                <span className="inline-block h-5 w-5" />
+              )}
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </div>
+        </div>
+      </header>
 
-        {/* Input Form */}
-        <footer className="border-t border-border/40 bg-background/80 backdrop-blur-sm flex-shrink-0 w-full"
-                style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-          <div className="container mx-auto px-4 py-3">
-            <form onSubmit={handleSubmit} className="mx-auto flex max-w-3xl gap-2">
-              <Input
-                value={input}
-                onChange={(e) => {
-                  const v = e.target.value
-                  setInput(v)
-                  if (v.trim().length > 0) {
-                    if (introVisible) setIntroVisible(false)
-                    if (!hintShown) {
-                      setMessages((prev) => {
-                        if (prev.length === 0) {
-                          return [
-                            ...prev,
-                            {
-                              id: "hint-1",
-                              role: "assistant",
-                              content: "Hi! I'm Kevin's AI assistant. You can ask me about my technical skills, projects, work experience, or anything else you'd like to know!",
-                            },
-                          ]
-                        }
-                        return prev
-                      })
-                      setHintShown(true)
-                    }
-                  }
-                }}
-                placeholder="Type your message..."
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button type="submit" disabled={isLoading || !input.trim()}>
-                <Send className="h-4 w-4" />
-                <span className="sr-only">Send message</span>
-              </Button>
-            </form>
+      {/* Chat Messages (middle section) */}
+      <main className="flex-1 min-h-0 w-full flex flex-col">
+        <div className="mx-auto w-full max-w-3xl flex-1 min-h-0 flex flex-col">
+          <div
+            className="flex-1 min-h-0 overflow-y-auto py-4 space-y-4 px-2"
+            style={{
+              // On mobile, use 100dvh minus header/footer height for better keyboard handling
+              height: 'auto',
+              maxHeight: '100dvh',
+            }}
+          >
+            {/* Chat suggestions (show when no messages) */}
+            {messages.length === 0 && !isLoading && (
+              <div className="flex flex-wrap gap-2 justify-center mb-6">
+                {chatSuggestions.map((suggestion, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="text-xs"
+                  >
+                    {suggestion}
+                  </Button>
+                ))}
+              </div>
+            )}
+            
+            {messages.map((message) => (
+              <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                <Card
+                  className={`max-w-[80%] p-4 ${
+                    message.role === "user" ? "bg-primary text-primary-foreground" : "bg-card text-card-foreground"
+                  }`}
+                >
+                  <p className="text-sm leading-relaxed">{message.content}</p>
+                </Card>
+              </div>
+            ))}
+            
+            {/* Show typing message */}
+            {typingMessage && (
+              <div className="flex justify-start">
+                <Card className="max-w-[80%] bg-card p-4 text-card-foreground">
+                  <p className="text-sm leading-relaxed">
+                    {typingMessage.content}
+                    <span className="inline-block w-2 h-5 bg-foreground ml-1 animate-pulse">|</span>
+                  </p>
+                </Card>
+              </div>
+            )}
+            
+            {/* Show thinking message */}
+            {isLoading && (
+              <div className="flex justify-start">
+                <Card className="max-w-[80%] bg-card p-4 text-card-foreground">
+                  <p className="text-sm text-muted-foreground italic">
+                    Kevin is thinking...
+                  </p>
+                </Card>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
-        </footer>
-      </div>
+        </div>
+      </main>
+
+      {/* Input Form (footer) */}
+      <footer className="border-t border-border/40 bg-background/80 backdrop-blur-sm flex-shrink-0 w-full">
+        <div className="container mx-auto px-4 py-3">
+          <form onSubmit={handleSubmit} className="mx-auto flex max-w-3xl gap-2">
+            <Input
+              value={input}
+              onChange={(e) => {
+                const v = e.target.value
+                setInput(v)
+                if (v.trim().length > 0) {
+                  if (introVisible) setIntroVisible(false)
+                  if (!hintShown) {
+                    setMessages((prev) => {
+                      if (prev.length === 0) {
+                        return [
+                          ...prev,
+                          {
+                            id: "hint-1",
+                            role: "assistant",
+                            content: "Hi! I'm Kevin's AI assistant. You can ask me about my technical skills, projects, work experience, or anything else you'd like to know!",
+                          },
+                        ]
+                      }
+                      return prev
+                    })
+                    setHintShown(true)
+                  }
+                }
+              }}
+              placeholder="Type your message..."
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Button type="submit" disabled={isLoading || !input.trim()}>
+              <Send className="h-4 w-4" />
+              <span className="sr-only">Send message</span>
+            </Button>
+          </form>
+        </div>
+      </footer>
     </div>
   )
 }
