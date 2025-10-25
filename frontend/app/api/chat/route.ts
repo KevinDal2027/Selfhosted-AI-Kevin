@@ -1,20 +1,18 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    // This works because it's server-side (inside Docker network)
+    const body = await request.json()
+    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
     }
     if (process.env.API_KEY) headers['X-API-Key'] = process.env.API_KEY
+    
     const backendResponse = await fetch('http://ai-backend:3001/api/chat', {
       method: 'POST',
       headers,
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(body)
     })
 
     if (!backendResponse.ok) {
@@ -22,11 +20,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const data = await backendResponse.json()
-    res.status(200).json(data)
+    return NextResponse.json(data)
   } catch (error) {
     console.error('API proxy error:', error)
-    res.status(500).json({ 
-      error: 'AI service is currently unavailable. Please try again later.' 
-    })
+    return NextResponse.json(
+      { error: 'AI service is currently unavailable. Please try again later.' },
+      { status: 500 }
+    )
   }
 }
