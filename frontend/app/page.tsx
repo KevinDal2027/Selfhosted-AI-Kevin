@@ -187,7 +187,7 @@ const handleSuggestionClick = async (suggestion: string) => {
 
       <div className="relative z-10 flex h-full flex-col">
         {/* Header */}
-        <header className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
+        <header className="border-b border-border/40 bg-background/80 backdrop-blur-sm flex-shrink-0">
           <div className="container mx-auto flex items-center justify-between px-4 py-2">
             <div className="flex items-center gap-2">
               <button
@@ -220,7 +220,13 @@ const handleSuggestionClick = async (suggestion: string) => {
         {/* Chat Messages */}
         <main className="container mx-auto flex-1 overflow-hidden px-4">
           <div className="mx-auto h-full max-w-3xl">
-            <div className="h-[calc(100vh-8rem)] overflow-y-auto py-4 space-y-4 px-2">
+            <div className="overflow-y-auto py-4 space-y-4 px-2"
+                 style={{
+                   height: 'calc(100vh - 8rem)',
+                   paddingBottom: '5.5rem', // space for chatbox
+                   paddingTop: '0.5rem',
+                 }}
+            >
               {/* Chat suggestions (show when no messages) */}
               {messages.length === 0 && !isLoading && (
                 <div className="flex flex-wrap gap-2 justify-center mb-6">
@@ -278,8 +284,9 @@ const handleSuggestionClick = async (suggestion: string) => {
         </main>
 
         {/* Input Form */}
-        <footer className="border-t border-border/40 bg-background/80 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-3 mb-5">
+        <footer className="border-t border-border/40 bg-background/80 backdrop-blur-sm flex-shrink-0 w-full"
+                style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+          <div className="container mx-auto px-4 py-3">
             <form onSubmit={handleSubmit} className="mx-auto flex max-w-3xl gap-2">
               <Input
                 value={input}
