@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+.tmp/
+tmp/
+
+# Env files
+.env
+.env.*
+
+# OS/Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Misc
+*.swp
+*.swo
