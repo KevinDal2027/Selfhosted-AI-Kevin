@@ -12,7 +12,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ollama = new Ollama({ host: 'http://localhost:11434' });
+const ollama = new Ollama({ 
+  host: process.env.OLLAMA_HOST || 'http://localhost:11434' 
+});
 
 // Load your personal data
 const aboutKevin = readFileSync(join(__dirname, 'data', 'about-kevin.txt'), 'utf8');
