@@ -37,3 +37,6 @@ tmp/
 # Misc
 *.swp
 *.swo
+
+models/about-kevin.txt
+models/Modelfile
