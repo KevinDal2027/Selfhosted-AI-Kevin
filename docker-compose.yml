@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  ai-frontend:
+    build: ./frontend
+    ports: ["3000:3000"]
+    restart: unless-stopped
+    depends_on: [ai-backend]
+    env_file:
+      - ./frontend/.env
+  ai-backend:
+    build: ./backend
+    ports: 
+      - "3001:3001"
+    restart: unless-stopped
+    depends_on: [ollama]
+    env_file:
+      - ./backend/.env
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+  ollama:
+    build:
+      context: ./kevin-ollama
+      dockerfile: Dockerfile
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
