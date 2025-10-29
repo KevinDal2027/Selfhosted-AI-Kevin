@@ -1,0 +1,35 @@
+name: Docker-compose for home server
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v1
+        with:
+          authkey: ${{ secrets.TAILSCALE_SSH_KEY }}
+      - name: Deploy to docker
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            echo "Go to Directory"
+            cd ~/Projects/Selfhosted-AI-Kevin
+            echo "Pulling..."
+            git pull origin master
+            echo "Reset docker hosts"
+            docker-compose down
+            echo "Build and deploy hosts"
+            docker-compose up --build -d
+            echo "Wait til ollama is done creating kevin model"
+            docker logs selfhosted-ai-kevin_ollama_1
+            & wait
+            echo "Done!!!"
