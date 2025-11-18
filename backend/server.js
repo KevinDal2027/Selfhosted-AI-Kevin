@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { Ollama } from 'ollama';
+// import { Ollama } from 'ollama';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
@@ -41,9 +41,9 @@ const apiKeyAuth = (req, res, next) => {
 };
 
 // Ollama client
-const ollama = new Ollama({
-  host: OLLAMA_HOST
-});
+// const ollama = new Ollama({
+//   host: OLLAMA_HOST
+// });
 
 // Chat endpoint
 app.post('/api/chat', apiKeyAuth, limiter, async (req, res) => {
@@ -53,61 +53,75 @@ app.post('/api/chat', apiKeyAuth, limiter, async (req, res) => {
     return res.status(400).json({ error: 'Message is required' });
   }
 
-  try {
-    const response = await ollama.generate({
-      model: 'kevin', // 👈 your custom model with embedded personal data
-      prompt: message,
-      stream: false
-    });
+  // AI generation disabled - server overheating
+  res.json({
+    success: true,
+    answer: "I'm disabling this AI features because my home / laptop server is actually burning because there are so many requests lol.",
+    model: 'kevin'
+  });
 
-    let answer = response.response.trim();
+  // try {
+  //   const response = await ollama.generate({
+  //     model: 'kevin', // 👈 your custom model with embedded personal data
+  //     prompt: message,
+  //     stream: false
+  //   });
 
-    // Fix small reference issues (in case model sometimes uses “Kevin”)
-    answer = answer
-      .replace(/Kevin is/gi, 'I am')
-      .replace(/Kevin has/gi, 'I have')
-      .replace(/Kevin's/gi, 'my')
-      .replace(/Kevin was/gi, 'I was')
-      .replace(/Kevin can/gi, 'I can')
-      .replace(/Kevin would/gi, 'I would')
-      .replace(/Kevin will/gi, 'I will')
-      .replace(/Kevin does/gi, 'I do')
-      .replace(/Kevin loves/gi, 'I love')
-      .replace(/Kevin enjoys/gi, 'I enjoy')
-      .replace(/Kevin built/gi, 'I built')
-      .replace(/Kevin worked/gi, 'I worked')
-      .replace(/Kevin learned/gi, 'I learned')
-      .replace(/\bKevin\b/gi, 'I');
+  //   let answer = response.response.trim();
 
-    res.json({
-      success: true,
-      answer,
-      model: 'kevin'
-    });
-  } catch (error) {
-    console.error('Ollama error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'I’m having trouble thinking right now. Try again in a moment!'
-    });
-  }
+  //   // Fix small reference issues (in case model sometimes uses "Kevin")
+  //   answer = answer
+  //     .replace(/Kevin is/gi, 'I am')
+  //     .replace(/Kevin has/gi, 'I have')
+  //     .replace(/Kevin's/gi, 'my')
+  //     .replace(/Kevin was/gi, 'I was')
+  //     .replace(/Kevin can/gi, 'I can')
+  //     .replace(/Kevin would/gi, 'I would')
+  //     .replace(/Kevin will/gi, 'I will')
+  //     .replace(/Kevin does/gi, 'I do')
+  //     .replace(/Kevin loves/gi, 'I love')
+  //     .replace(/Kevin enjoys/gi, 'I enjoy')
+  //     .replace(/Kevin built/gi, 'I built')
+  //     .replace(/Kevin worked/gi, 'I worked')
+  //     .replace(/Kevin learned/gi, 'I learned')
+  //     .replace(/\bKevin\b/gi, 'I');
+
+  //   res.json({
+  //     success: true,
+  //     answer,
+  //     model: 'kevin'
+  //   });
+  // } catch (error) {
+  //   console.error('Ollama error:', error);
+  //   res.status(500).json({
+  //     success: false,
+  //     error: 'I'm having trouble thinking right now. Try again in a moment!'
+  //   });
+  // }
 });
 
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
-  try {
-    const models = await ollama.list();
-    res.json({
-      status: 'healthy',
-      models: models.models,
-      ollama: 'connected'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'unhealthy',
-      error: 'Ollama not available'
-    });
-  }
+  // AI features disabled - no Ollama check needed
+  res.json({
+    status: 'healthy',
+    models: [],
+    ollama: 'disabled'
+  });
+  
+  // try {
+  //   const models = await ollama.list();
+  //   res.json({
+  //     status: 'healthy',
+  //     models: models.models,
+  //     ollama: 'connected'
+  //   });
+  // } catch (error) {
+  //   res.status(500).json({
+  //     status: 'unhealthy',
+  //     error: 'Ollama not available'
+  //   });
+  // }
 });
 
 // Start server

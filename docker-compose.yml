@@ -17,10 +17,10 @@ services:
       - ./backend/.env
     environment:
       - OLLAMA_HOST=http://ollama:11434
-  ollama:
-    build:
-      context: ./kevin-ollama
-      dockerfile: Dockerfile
-    ports:
-      - "11434:11434"
-    restart: unless-stopped
+  # ollama:
+  #   build:
+  #     context: ./kevin-ollama
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "11434:11434"
+  #   restart: unless-stopped

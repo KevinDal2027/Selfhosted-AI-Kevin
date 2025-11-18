@@ -28,7 +28,8 @@ jobs:
             echo "Reset docker hosts"
             docker-compose down
             echo "Build and deploy hosts"
-            docker-compose up --build -d & wait
-            echo "Wait til ollama is done creating kevin model"
-            docker logs selfhosted-ai-kevin_ollama_1 & wait
+            docker-compose up --build -d
+            # docker-compose up --build -d & wait
+            # echo "Wait til ollama is done creating kevin model"
+            # docker logs selfhosted-ai-kevin_ollama_1 & wait
             echo "Done!!!"
